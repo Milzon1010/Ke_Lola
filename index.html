@@ -198,7 +198,10 @@
 </head>
 <body>
 <div class="topbar">
-  <div class="brand"><span class="logo">🔧</span> Ke_Lola</div>
+  <div class="brand">
+    <button class="mobile-menu-btn" onclick="document.querySelector('.side').classList.toggle('show-mobile')">☰</button>
+    <span class="logo">🔧</span> Ke_Lola
+  </div>
   <div class="switch">
     <button id="btnCorp" class="active" onclick="setMode('corp')">Korporat · Manajemen</button>
     <button id="btnCust" onclick="setMode('cust')">Pelanggan · Marketplace</button>
