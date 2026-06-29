@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ke_Lola — Prototype Aplikasi</title>
+<style>
+  :root{
+    --ink:#1a2b4a; --ink-2:#2a3f63;
+    --paper:#f5f6f9; --card:#ffffff; --line:#e6e9f0;
+    --muted:#6b7794; --brand:#1f3a6e; --brand-soft:#eaf0fb;
+    --accent:#e8923a;
+    --green:#2f9e6b; --green-soft:#e4f3ec;
+    --amber:#c9892a; --amber-soft:#fbf2df;
+    --red:#cf4d4d; --red-soft:#fbe9e9;
+    --blue-soft:#e6eefb; --purple:#7a5cc9; --purple-soft:#efeafb;
+    --radius:14px; --shadow:0 1px 2px rgba(26,43,74,.06), 0 8px 24px rgba(26,43,74,.05);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
+  button{font-family:inherit}
+  .topbar{position:sticky;top:0;z-index:50;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:12px 20px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.3px}
+  .brand .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#f0a85a);display:grid;place-items:center;font-size:16px}
+  .switch{display:flex;background:rgba(255,255,255,.12);border-radius:999px;padding:4px;gap:4px}
+  .switch button{border:0;background:transparent;color:rgba(255,255,255,.7);padding:8px 16px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;transition:.18s}
+  .switch button.active{background:#fff;color:var(--ink)}
+  .mode{display:none}.mode.show{display:block}
+  .corp{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 54px)}
+  .side{background:var(--ink);color:#cdd5e6;padding:20px 14px}
+  .side .ctx{background:rgba(255,255,255,.06);border-radius:10px;padding:12px;margin-bottom:18px}
+  .side .ctx .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:#8c99b8}
+  .side .ctx select{width:100%;margin-top:6px;background:transparent;border:0;color:#fff;font-size:14px;font-weight:600;cursor:pointer}
+  .side .ctx select option{color:#000}
+  .nav a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;color:#aeb9d2;text-decoration:none;font-size:14px;margin-bottom:2px;cursor:pointer;transition:.12s}
+  .nav a.active{background:rgba(255,255,255,.1);color:#fff;font-weight:600}
+  .nav a:hover{background:rgba(255,255,255,.06)}
+  .nav .ic{width:18px;text-align:center}
+  .main{padding:24px 28px;overflow:auto}
+  .page{display:none}.page.show{display:block;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+  .page-head h1{font-size:22px;font-weight:700}
+  .page-head .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .range{display:flex;gap:6px}
+  .range button,.btn{border:1px solid var(--line);background:#fff;color:var(--muted);padding:7px 13px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
+  .range button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .btn-primary{background:var(--brand);color:#fff;border-color:var(--brand);padding:9px 16px;font-size:13px}
+  .btn-primary:hover{filter:brightness(1.08)}
+  .btn-ghost:hover{background:var(--paper)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+  .kpi .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-size:16px}
+  .kpi .lbl{color:var(--muted);font-size:12px;font-weight:600;margin-top:12px}
+  .kpi .val{font-size:26px;font-weight:700;margin-top:2px;letter-spacing:-.5px}
+  .kpi .delta{font-size:12px;font-weight:600;margin-top:4px}
+  .delta.up{color:var(--green)}.delta.down{color:var(--red)}
+  .grid2{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;margin-bottom:18px}
+  .grid1{margin-bottom:18px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);gap:10px;flex-wrap:wrap}
+  .panel-head h2{font-size:15px;font-weight:700}
+  .panel-head .hint{font-size:12px;color:var(--muted)}
+  .panel-body{padding:18px}
+  .panel-body.flush{padding:0}
+  .chart{display:flex;align-items:flex-end;gap:14px;height:190px;padding-top:10px}
+  .bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end}
+  .bar{width:100%;max-width:42px;border-radius:7px 7px 0 0;background:var(--blue-soft);position:relative;transition:.25s;cursor:pointer}
+  .bar.peak{background:var(--brand)}.bar:hover{filter:brightness(.95)}
+  .bar .tip{position:absolute;top:-30px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:11px;padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:.15s}
+  .bar:hover .tip{opacity:1}
+  .bar-lbl{font-size:11px;color:var(--muted)}
+  .row{display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
+  .pill{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .nm{font-size:13px;font-weight:600}.sub2{font-size:11px;color:var(--muted);margin-top:1px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:12px 18px;border-bottom:1px solid var(--line);font-weight:700;background:#fafbfd}
+  thead th.num{text-align:right}
+  tbody td{padding:13px 18px;border-bottom:1px solid var(--line)}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:#fafbfd}
+  td .ttl{font-weight:600}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .input{border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--ink);background:#fff;outline:none}
+  .input:focus{border-color:var(--brand)}
+  .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg button{border:0;background:#fff;padding:8px 13px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-right:1px solid var(--line)}
+  .seg button:last-child{border-right:0}
+  .seg button.active{background:var(--brand);color:#fff}
+  .stock-bar{flex:1;height:6px;background:var(--line);border-radius:99px;overflow:hidden;max-width:120px}
+  .stock-bar i{display:block;height:100%;border-radius:99px}
+  .board{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;padding:18px;overflow-x:auto}
+  .col{background:#fafbfd;border:1px solid var(--line);border-radius:12px;padding:10px;min-width:170px}
+  .col h3{font-size:12px;font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+  .col .count{background:var(--line);border-radius:99px;padding:1px 8px;font-size:11px;color:var(--muted)}
+  .ticket{background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:8px;cursor:pointer;box-shadow:0 1px 2px rgba(26,43,74,.04)}
+  .ticket:hover{border-color:var(--brand)}
+  .ticket .tno{font-size:11px;font-weight:700;color:var(--brand)}
+  .ticket .tdesc{font-size:12.5px;font-weight:600;margin-top:3px}
+  .ticket .tmeta{font-size:11px;color:var(--muted);margin-top:4px}
+  .overlay{position:fixed;inset:0;background:rgba(20,30,55,.45);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:16px;width:560px;max-width:100%;max-height:88vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:2}
+  .modal-head h2{font-size:17px}
+  .modal-body{padding:22px}
+  .x{cursor:pointer;font-size:22px;color:var(--muted);line-height:1;border:0;background:none}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px}
+  .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:14px;outline:none;font-family:inherit}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand)}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#fff}
+  .check{display:flex;align-items:center;gap:11px;padding:12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:.12s}
+  .check:hover{border-color:var(--brand)}
+  .check.done{background:var(--green-soft);border-color:var(--green)}
+  .check .box{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);display:grid;place-items:center;flex-shrink:0;font-size:13px;color:#fff}
+  .check.done .box{background:var(--green);border-color:var(--green)}
+  .check .txt{font-size:13px;font-weight:500}
+  .check.done .txt{text-decoration:line-through;color:var(--muted)}
+  .stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .stepper button{border:0;background:#fafbfd;width:30px;height:32px;font-size:16px;cursor:pointer;color:var(--brand)}
+  .stepper button:hover{background:var(--brand-soft)}
+  .stepper span{width:40px;text-align:center;font-size:13px;font-weight:700}
+  .total-bar{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--ink);color:#fff;border-radius:12px;margin-top:14px}
+  .total-bar .lbl{font-size:13px;color:#aeb9d2}
+  .total-bar .amt{font-size:22px;font-weight:700}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:13px 22px;border-radius:11px;font-size:13px;font-weight:600;box-shadow:0 12px 40px rgba(0,0,0,.25);z-index:200;opacity:0;transition:.3s}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  .empty{text-align:center;padding:50px 20px;color:var(--muted)}
+  .empty .big{font-size:34px;margin-bottom:8px}
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);padding:0 18px}
+  .tabs button{border:0;background:none;padding:13px 14px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tabs button.active{color:var(--brand);border-bottom-color:var(--brand)}
+  .cust-wrap{display:grid;place-items:start center;padding:30px 16px}
+  .phone{width:390px;max-width:100%;background:var(--card);border:1px solid var(--line);border-radius:30px;box-shadow:0 20px 60px rgba(26,43,74,.16);overflow:hidden}
+  .ph-screen{display:none}.ph-screen.show{display:block}
+  .ph-head{background:var(--ink);color:#fff;padding:22px 20px 26px}
+  .ph-head .hi{font-size:13px;color:#aeb9d2}
+  .ph-head h2{font-size:22px;font-weight:700;margin-top:2px}
+  .ph-back{background:none;border:0;color:#aeb9d2;font-size:13px;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+  .search{margin-top:16px;background:rgba(255,255,255,.13);border-radius:11px;padding:12px 14px;display:flex;align-items:center;gap:10px;color:#aeb9d2;font-size:13px}
+  .chips{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .chip{font-size:12px;font-weight:600;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.1);color:#cdd5e6;cursor:pointer}
+  .chip.on{background:#fff;color:var(--ink)}
+  .ph-body{padding:18px}
+  .sec-lbl{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:2px 0 12px}
+  .shop{display:flex;gap:13px;padding:13px;border:1px solid var(--line);border-radius:13px;margin-bottom:11px;cursor:pointer;transition:.15s}
+  .shop:hover{border-color:var(--brand);box-shadow:var(--shadow)}
+  .shop.sel{border-color:var(--brand);background:var(--brand-soft)}
+  .shop .thumb{width:54px;height:54px;border-radius:11px;display:grid;place-items:center;font-size:22px;flex-shrink:0}
+  .shop .nm{font-size:14px;font-weight:700}
+  .shop .det{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .shop .tags{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+  .tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px}
+  .tag.star{background:var(--amber-soft);color:var(--amber)}
+  .tag.open{background:var(--green-soft);color:var(--green)}
+  .tag.b2b{background:var(--blue-soft);color:var(--brand)}
+  .svc-opt{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;cursor:pointer}
+  .svc-opt:hover{border-color:var(--brand)}
+  .svc-opt.sel{border-color:var(--brand);background:var(--brand-soft)}
+  .svc-opt .r{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex-shrink:0}
+  .svc-opt.sel .r{border-color:var(--brand);background:var(--brand);box-shadow:inset 0 0 0 3px #fff}
+  .svc-opt .price{margin-left:auto;font-weight:700;font-size:14px}
+  .slot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+  .slot{text-align:center;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer}
+  .slot:hover{border-color:var(--brand)}
+  .slot.sel{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .day-pick{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+  .day{min-width:64px;text-align:center;padding:10px;border:1px solid var(--line);border-radius:10px;cursor:pointer;flex-shrink:0}
+  .day.sel{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .day .dd{font-size:18px;font-weight:700}
+  .day .dm{font-size:11px;opacity:.7}
+  .summary-line{display:flex;justify-content:space-between;font-size:14px;padding:9px 0;border-bottom:1px solid var(--line)}
+  .summary-line:last-child{border:0;font-weight:700;font-size:16px;padding-top:13px}
+  .ph-cta{margin:8px 18px 18px;padding:15px;text-align:center;background:var(--brand);color:#fff;border-radius:13px;font-weight:700;font-size:15px;cursor:pointer;border:0;width:calc(100% - 36px)}
+  .ph-cta:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
+  .tabbar{display:flex;justify-content:space-around;padding:14px 0 18px;border-top:1px solid var(--line)}
+  .tabbar div{font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+  .tabbar div.on{color:var(--brand);font-weight:700}
+  .tabbar .ti{font-size:18px}
+  .success-anim{text-align:center;padding:40px 24px}
+  .success-anim .circle{width:80px;height:80px;border-radius:50%;background:var(--green-soft);color:var(--green);font-size:42px;display:grid;place-items:center;margin:0 auto 18px;animation:pop .4s ease}
+  @keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+  @media(max-width:900px){
+    .corp{grid-template-columns:1fr}.side{display:none}
+    .kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}
+    .board{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="logo">🔧</span> Ke_Lola</div>
+  <div class="switch">
+    <button id="btnCorp" class="active" onclick="setMode('corp')">Korporat · Manajemen</button>
+    <button id="btnCust" onclick="setMode('cust')">Pelanggan · Marketplace</button>
+  </div>
+</div>
+<div id="corp" class="mode show">
+<div class="corp">
+  <aside class="side">
+    <div class="ctx">
+      <div class="lbl">Cabang</div>
+      <select onchange="return false">
+        <option>Jakarta Pusat</option><option>Bekasi (Cabang)</option>
+        <option>Bengkel Jaya — Partner</option><option>Semua Cabang (Agregat)</option>
+      </select>
+    </div>
+    <nav class="nav" id="nav"></nav>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+</div>
+<div id="cust" class="mode"><div class="cust-wrap"><div class="phone" id="phone"></div></div></div>
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+/* ===== DATA ===== */
+const DATA = {
+  statuses:['Menunggu','Dikerjakan','Menunggu Sparepart','Quality Control','Selesai','Diserahkan'],
+  workOrders:[
+    {no:'WO-2026-0481',plat:'B 1234 CD',kendaraan:'Toyota Avanza 2019',desc:'Ganti kampas rem depan',mek:'Budi Santoso',status:'Dikerjakan',estimasi:850000},
+    {no:'WO-2026-0480',plat:'D 5678 EF',kendaraan:'Honda Brio 2021',desc:'Body repair pintu kiri',mek:'Andi Pratama',status:'Quality Control',estimasi:3200000},
+    {no:'WO-2026-0479',plat:'F 9012 GH',kendaraan:'Mitsubishi Canter',desc:'Fabrikasi box truk kustom',mek:'Tim 3 (Karoseri)',status:'Menunggu Sparepart',estimasi:24500000},
+    {no:'WO-2026-0478',plat:'B 3456 IJ',kendaraan:'Daihatsu Xenia 2018',desc:'Servis berkala 40.000 km',mek:'Dewi Lestari',status:'Selesai',estimasi:1250000},
+    {no:'WO-2026-0477',plat:'B 7788 KL',kendaraan:'Suzuki Ertiga 2020',desc:'Tune-up & ganti oli',mek:'Eko Wijaya',status:'Dikerjakan',estimasi:680000},
+    {no:'WO-2026-0476',plat:'B 2211 MN',kendaraan:'Toyota Innova 2017',desc:'Spooring & balancing',mek:'Rian Hidayat',status:'Menunggu',estimasi:450000},
+    {no:'WO-2026-0475',plat:'D 9900 OP',kendaraan:'Honda Mobilio 2019',desc:'Ganti aki & servis AC',mek:'Budi Santoso',status:'Diserahkan',estimasi:1900000},
+  ],
+  spareparts:[
+    {sku:'BRK-AVZ-01',nm:'Kampas Rem Depan — Avanza',kat:'Rem',stok:2,min:10,harga:185000},
+    {sku:'OIL-1040-4',nm:'Oli Mesin 10W-40 (4L)',kat:'Oli',stok:4,min:15,harga:320000},
+    {sku:'FLT-INV-02',nm:'Filter Udara — Innova',kat:'Filter',stok:1,min:8,harga:95000},
+    {sku:'BAT-45-01',nm:'Aki 45Ah',kat:'Kelistrikan',stok:3,min:6,harga:780000},
+    {sku:'LMP-H4-01',nm:'Lampu Halogen H4',kat:'Kelistrikan',stok:5,min:12,harga:55000},
+    {sku:'OIL-FLT-01',nm:'Filter Oli Universal',kat:'Filter',stok:24,min:10,harga:42000},
+    {sku:'BRK-FLD-01',nm:'Minyak Rem DOT 4',kat:'Rem',stok:18,min:8,harga:38000},
+    {sku:'SPK-NGK-01',nm:'Busi NGK (set 4)',kat:'Mesin',stok:30,min:12,harga:120000},
+    {sku:'BLT-VB-01',nm:'V-Belt Avanza',kat:'Mesin',stok:14,min:6,harga:165000},
+    {sku:'WPR-FR-01',nm:'Wiper Depan (pasang)',kat:'Aksesoris',stok:40,min:10,harga:75000},
+  ],
+  services:[
+    {nm:'Servis Berkala Ringan',durasi:'1 jam',harga:350000},
+    {nm:'Servis Berkala Lengkap',durasi:'3 jam',harga:850000},
+    {nm:'Ganti Oli + Filter',durasi:'30 mnt',harga:420000},
+    {nm:'Tune-up Mesin',durasi:'2 jam',harga:680000},
+    {nm:'Spooring & Balancing',durasi:'1 jam',harga:450000},
+  ],
+  invoices:[
+    {no:'INV-2026-1182',wo:'WO-2026-0478',plat:'B 3456 IJ',cust:'Bpk. Hartono',total:1387500,status:'Lunas',metode:'QRIS'},
+    {no:'INV-2026-1181',wo:'WO-2026-0475',plat:'D 9900 OP',cust:'Ibu Wulan',total:2109000,status:'Lunas',metode:'Transfer'},
+    {no:'INV-2026-1180',wo:'WO-2026-0470',plat:'B 5050 QR',cust:'PT Logistik Maju',total:27195000,status:'Piutang',metode:'Termin 30 hari'},
+    {no:'INV-2026-1179',wo:'WO-2026-0469',plat:'F 1212 ST',cust:'Bpk. Surya',total:765000,status:'Lunas',metode:'Tunai'},
+  ],
+  suppliers:[
+    {nm:'CV Sumber Sparepart',kat:'Sparepart umum',kontak:'021-555-0182',rating:4.7},
+    {nm:'PT Astra Otoparts',kat:'OEM resmi',kontak:'021-555-0455',rating:4.9},
+    {nm:'Toko Oli Berkah',kat:'Pelumas',kontak:'0812-3344-5566',rating:4.5},
+  ],
+  purchaseOrders:[
+    {no:'PO-2026-0312',supplier:'CV Sumber Sparepart',items:3,total:2450000,status:'Menunggu Approval'},
+    {no:'PO-2026-0311',supplier:'PT Astra Otoparts',items:5,total:6800000,status:'Disetujui'},
+    {no:'PO-2026-0310',supplier:'Toko Oli Berkah',items:2,total:1920000,status:'Diterima'},
+  ],
+  customers:[
+    {nm:'Bpk. Hartono',hp:'0812-1111-2222',kendaraan:'2 unit',terakhir:'Servis berkala · 12 Jun'},
+    {nm:'Ibu Wulan',hp:'0813-3333-4444',kendaraan:'1 unit',terakhir:'Ganti aki · 8 Jun'},
+    {nm:'PT Logistik Maju',hp:'021-555-7788',kendaraan:'14 unit (armada)',terakhir:'Box truk · 2 Jun'},
+    {nm:'Bpk. Surya',hp:'0856-9999-0000',kendaraan:'1 unit',terakhir:'Tune-up · 28 Mei'},
+  ],
+  staff:[
+    {nm:'Budi Santoso',role:'Mekanik Senior',hadir:true,woSelesai:42,target:50},
+    {nm:'Andi Pratama',role:'Mekanik Body',hadir:true,woSelesai:31,target:40},
+    {nm:'Dewi Lestari',role:'Mekanik',hadir:true,woSelesai:38,target:45},
+    {nm:'Eko Wijaya',role:'Mekanik',hadir:true,woSelesai:29,target:40},
+    {nm:'Rian Hidayat',role:'Mekanik',hadir:false,woSelesai:22,target:40},
+  ],
+  chartDays:[{d:'Sel',v:28},{d:'Rab',v:34},{d:'Kam',v:31},{d:'Jum',v:45},{d:'Sab',v:52},{d:'Min',v:23},{d:'Sen',v:42}],
+};
+const statusColor={
+  'Menunggu':['var(--line)','var(--muted)'],'Dikerjakan':['var(--amber-soft)','var(--amber)'],
+  'Menunggu Sparepart':['var(--red-soft)','var(--red)'],'Quality Control':['var(--blue-soft)','var(--brand)'],
+  'Selesai':['var(--green-soft)','var(--green)'],'Diserahkan':['var(--purple-soft)','var(--purple)'],
+  'Lunas':['var(--green-soft)','var(--green)'],'Piutang':['var(--amber-soft)','var(--amber)'],
+  'Menunggu Approval':['var(--amber-soft)','var(--amber)'],'Disetujui':['var(--blue-soft)','var(--brand)'],'Diterima':['var(--green-soft)','var(--green)'],
+};
+const avatarColors=['#1f3a6e','#e8923a','#2f9e6b','#7a5cc9','#c9892a','#cf4d4d'];
+const rp=n=>'Rp '+n.toLocaleString('id-ID');
+const rpShort=n=>n>=1e6?'Rp '+(n/1e6).toFixed(n%1e6?1:0)+'jt':'Rp '+(n/1e3).toFixed(0)+'rb';
+const initials=s=>s.replace(/[()]/g,'').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+const pill=s=>{const[c,f]=statusColor[s]||['var(--line)','var(--muted)'];return `<span class="pill" style="background:${c};color:${f}">${s}</span>`};
+let avi=0;const av=()=>avatarColors[avi++%avatarColors.length];
+
+/* ===== SHELL / ROUTER ===== */
+function setMode(m){
+  document.getElementById('corp').classList.toggle('show',m==='corp');
+  document.getElementById('cust').classList.toggle('show',m==='cust');
+  document.getElementById('btnCorp').classList.toggle('active',m==='corp');
+  document.getElementById('btnCust').classList.toggle('active',m==='cust');
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
+function openModal(html){document.getElementById('modal').innerHTML=html;document.getElementById('overlay').classList.add('show');}
+function closeModal(){document.getElementById('overlay').classList.remove('show');}
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeModal();});
+
+const MODULES=[
+  {id:'dashboard',ic:'▦',label:'Dashboard'},
+  {id:'wo',ic:'🛠',label:'Work Order'},
+  {id:'gudang',ic:'📦',label:'Sparepart & Gudang'},
+  {id:'purchasing',ic:'🛒',label:'Purchasing'},
+  {id:'qc',ic:'✅',label:'Quality Control'},
+  {id:'kasir',ic:'💳',label:'Kasir & Pembayaran'},
+  {id:'crm',ic:'👥',label:'CRM'},
+  {id:'hr',ic:'👷',label:'HR & Mekanik'},
+  {id:'laporan',ic:'📊',label:'Laporan'},
+  {id:'manajemen',ic:'⚙️',label:'Manajemen'},
+];
+let current='dashboard';
+function renderNav(){
+  document.getElementById('nav').innerHTML=MODULES.map(m=>
+    `<a class="${m.id===current?'active':''}" onclick="go('${m.id}')"><span class="ic">${m.ic}</span> ${m.label}</a>`).join('');
+}
+function go(id){current=id;renderNav();const main=document.getElementById('main');main.innerHTML='';avi=0;PAGES[id](main);}
+const PAGES={};
+/* ===== DASHBOARD ===== */
+PAGES.dashboard=(el)=>{
+  const max=Math.max(...DATA.chartDays.map(x=>x.v));
+  const aktif=DATA.workOrders.filter(w=>!['Diserahkan'].includes(w.status));
+  const kritis=DATA.spareparts.filter(s=>s.stok<s.min);
+  const bekerja=DATA.workOrders.filter(w=>['Dikerjakan','Quality Control','Menunggu Sparepart'].includes(w.status));
+  el.innerHTML=`
+  <div class="page-head">
+    <div><h1>Dashboard · Cabang Jakarta Pusat</h1>
+    <div class="sub">Senin, 29 Juni 2026 · ringkasan operasional hari berjalan</div></div>
+    <div class="range"><button onclick="toast('Filter: Hari Ini')">Hari Ini</button>
+    <button class="active">7 Hari</button><button onclick="toast('Filter: 30 Hari')">30 Hari</button></div>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="ic" style="background:var(--blue-soft);color:var(--brand)">🚗</div><div class="lbl">Kendaraan Masuk</div><div class="val">24</div><div class="delta up">▲ 12% vs kemarin</div></div>
+    <div class="kpi"><div class="ic" style="background:var(--green-soft);color:var(--green)">✔</div><div class="lbl">Selesai / Diserahkan</div><div class="val">18</div><div class="delta up">▲ 6 unit</div></div>
+    <div class="kpi"><div class="ic" style="background:var(--amber-soft);color:var(--amber)">💰</div><div class="lbl">Pendapatan Harian</div><div class="val">Rp 42jt</div><div class="delta up">▲ 8% vs rata-rata</div></div>
+    <div class="kpi"><div class="ic" style="background:var(--red-soft);color:var(--red)">⚠</div><div class="lbl">Stok Kritis</div><div class="val">${kritis.length}</div><div class="delta down">item di bawah minimum</div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><div class="panel-head"><h2>Grafik Penjualan</h2><span class="hint">7 hari · juta Rupiah</span></div>
+      <div class="panel-body"><div class="chart">${DATA.chartDays.map(x=>`
+        <div class="bar-wrap"><div class="bar ${x.v===max?'peak':''}" style="height:${x.v/max*100}%"><span class="tip">Rp ${x.v}jt</span></div><div class="bar-lbl">${x.d}</div></div>`).join('')}</div></div></div>
+    <div class="panel"><div class="panel-head"><h2>Mekanik Bekerja</h2><span class="hint">${bekerja.length} aktif</span></div>
+      <div class="panel-body flush">${bekerja.map(w=>`<div class="row"><div class="avatar" style="background:${av()}">${initials(w.mek)}</div><div><div class="nm">${w.mek}</div><div class="sub2">${w.no} · ${w.desc}</div></div><span style="margin-left:auto">${pill(w.status)}</span></div>`).join('')}</div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><div class="panel-head"><h2>Work Order Aktif</h2><button class="btn btn-ghost" onclick="go('wo')">Lihat semua →</button></div>
+      <div class="panel-body flush">${aktif.slice(0,4).map(w=>`<div class="row" onclick="openWO('${w.no}')"><div><div class="nm" style="color:var(--brand)">${w.no}</div><div class="sub2">${w.plat} · ${w.desc}</div></div><span style="margin-left:auto">${pill(w.status)}</span></div>`).join('')}</div></div>
+    <div class="panel"><div class="panel-head"><h2>Stok Kritis</h2><button class="btn btn-ghost" onclick="go('purchasing')">Buat PR →</button></div>
+      <div class="panel-body flush">${kritis.map(s=>{const pct=Math.min(100,s.stok/s.min*100);const col=pct<25?'var(--red)':pct<60?'var(--amber)':'var(--green)';
+        return `<div class="row"><div><div class="nm">${s.nm}</div><div class="sub2">SKU ${s.sku} · min ${s.min}</div></div><div class="stock-bar" style="margin-left:auto"><i style="width:${pct}%;background:${col}"></i></div><div class="num" style="width:54px;font-weight:700;color:${col}">${s.stok}/${s.min}</div></div>`}).join('')}</div></div>
+  </div>`;
+};
+
+/* ===== WORK ORDER (Kanban + tabel) ===== */
+let woView='board';
+PAGES.wo=(el)=>{
+  el.innerHTML=`
+  <div class="page-head">
+    <div><h1>Work Order</h1><div class="sub">${DATA.workOrders.length} WO · tarik antar kolom untuk ubah status</div></div>
+    <div class="toolbar">
+      <div class="seg"><button class="${woView==='board'?'active':''}" onclick="woView='board';go('wo')">Papan</button><button class="${woView==='table'?'active':''}" onclick="woView='table';go('wo')">Tabel</button></div>
+      <button class="btn btn-primary" onclick="formWO()">+ Buat WO</button>
+    </div>
+  </div>`;
+  if(woView==='board'){
+    const wrap=document.createElement('div');wrap.className='panel';
+    wrap.innerHTML=`<div class="board">${DATA.statuses.map(st=>{
+      const items=DATA.workOrders.filter(w=>w.status===st);
+      return `<div class="col" ondragover="event.preventDefault()" ondrop="dropWO(event,'${st}')">
+        <h3>${st}<span class="count">${items.length}</span></h3>
+        ${items.map(w=>`<div class="ticket" draggable="true" ondragstart="dragWO(event,'${w.no}')" onclick="openWO('${w.no}')">
+          <div class="tno">${w.no}</div><div class="tdesc">${w.desc}</div><div class="tmeta">${w.plat} · ${w.mek}</div></div>`).join('')||'<div style="font-size:11px;color:var(--muted);padding:6px">—</div>'}
+      </div>`;}).join('')}</div>`;
+    el.appendChild(wrap);
+  } else {
+    const wrap=document.createElement('div');wrap.className='panel';
+    wrap.innerHTML=`<table><thead><tr><th>No. WO</th><th>Kendaraan</th><th>Pekerjaan</th><th>Mekanik</th><th>Status</th><th class="num">Estimasi</th></tr></thead>
+      <tbody>${DATA.workOrders.map(w=>`<tr onclick="openWO('${w.no}')"><td class="ttl" style="color:var(--brand)">${w.no}</td><td>${w.plat}<div class="sub2">${w.kendaraan}</div></td><td>${w.desc}</td><td>${w.mek}</td><td>${pill(w.status)}</td><td class="num">${rp(w.estimasi)}</td></tr>`).join('')}</tbody></table>`;
+    el.appendChild(wrap);
+  }
+};
+let dragNo=null;
+function dragWO(e,no){dragNo=no;}
+function dropWO(e,st){if(!dragNo)return;const w=DATA.workOrders.find(x=>x.no===dragNo);if(w){w.status=st;toast(`${w.no} → ${st}`);go('wo');}dragNo=null;}
+function openWO(no){
+  const w=DATA.workOrders.find(x=>x.no===no);if(!w)return;
+  const checklist=['Pemeriksaan awal & dokumentasi foto','Pembongkaran komponen','Penggantian sparepart','Pemasangan & penyetelan','Pembersihan & test fungsi'];
+  openModal(`
+    <div class="modal-head"><h2>${w.no}</h2><button class="x" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="field-row"><div class="field"><label>Kendaraan</label><div style="font-weight:600">${w.kendaraan}</div></div><div class="field"><label>Pelat</label><div style="font-weight:600">${w.plat}</div></div></div>
+      <div class="field"><label>Pekerjaan</label><div style="font-weight:600">${w.desc}</div></div>
+      <div class="field-row"><div class="field"><label>Mekanik</label><div style="font-weight:600">${w.mek}</div></div><div class="field"><label>Status</label><div>${pill(w.status)}</div></div></div>
+      <div class="field"><label>Checklist Pekerjaan</label>
+        ${checklist.map((c,i)=>`<div class="check ${i<2?'done':''}" onclick="this.classList.toggle('done');this.querySelector('.box').textContent=this.classList.contains('done')?'✓':''"><div class="box">${i<2?'✓':''}</div><div class="txt">${c}</div></div>`).join('')}
+      </div>
+      <div class="field"><label>Foto Sebelum / Sesudah</label>
+        <div style="display:flex;gap:10px"><div style="flex:1;height:80px;background:var(--paper);border:1px dashed var(--line);border-radius:10px;display:grid;place-items:center;color:var(--muted);font-size:12px">📷 Sebelum</div><div style="flex:1;height:80px;background:var(--paper);border:1px dashed var(--line);border-radius:10px;display:grid;place-items:center;color:var(--muted);font-size:12px">📷 Sesudah</div></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Tutup</button><button class="btn btn-primary" onclick="closeModal();toast('${w.no} diperbarui')">Simpan</button></div>`);
+}
+function formWO(){
+  openModal(`
+    <div class="modal-head"><h2>Buat Work Order</h2><button class="x" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="field-row"><div class="field"><label>Pelat Nomor</label><input id="f_plat" placeholder="B 1234 XX"></div><div class="field"><label>Kendaraan</label><input id="f_kend" placeholder="Toyota Avanza 2019"></div></div>
+      <div class="field"><label>Pekerjaan</label><input id="f_desc" placeholder="Ganti kampas rem depan"></div>
+      <div class="field-row"><div class="field"><label>Mekanik</label><select id="f_mek">${DATA.staff.map(s=>`<option>${s.nm}</option>`).join('')}</select></div><div class="field"><label>Estimasi (Rp)</label><input id="f_est" type="number" placeholder="850000"></div></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Batal</button><button class="btn btn-primary" onclick="saveWO()">Simpan WO</button></div>`);
+}
+function saveWO(){
+  const plat=document.getElementById('f_plat').value||'B 0000 XX';
+  const no='WO-2026-0'+(482+DATA.workOrders.length-7);
+  DATA.workOrders.unshift({no,plat,kendaraan:document.getElementById('f_kend').value||'—',desc:document.getElementById('f_desc').value||'Pekerjaan baru',mek:document.getElementById('f_mek').value,status:'Menunggu',estimasi:+document.getElementById('f_est').value||0});
+  closeModal();toast(`${no} dibuat`);go('wo');
+}
+
+/* ===== GUDANG ===== */
+let gudFilter='Semua';
+PAGES.gudang=(el)=>{
+  const kats=['Semua',...new Set(DATA.spareparts.map(s=>s.kat))];
+  const list=DATA.spareparts.filter(s=>gudFilter==='Semua'||s.kat===gudFilter);
+  const kritis=DATA.spareparts.filter(s=>s.stok<s.min).length;
+  const totalNilai=DATA.spareparts.reduce((a,s)=>a+s.stok*s.harga,0);
+  el.innerHTML=`
+  <div class="page-head"><div><h1>Sparepart & Gudang</h1><div class="sub">${DATA.spareparts.length} SKU · nilai stok ${rpShort(totalNilai)} · ${kritis} kritis</div></div>
+    <div class="toolbar"><button class="btn btn-ghost" onclick="importExcel()">📥 Import Excel</button><button class="btn btn-primary" onclick="formPart()">+ Sparepart</button></div></div>
+  <div class="panel">
+    <div class="panel-head"><div class="seg">${kats.map(k=>`<button class="${k===gudFilter?'active':''}" onclick="gudFilter='${k}';go('gudang')">${k}</button>`).join('')}</div>
+      <input class="input" placeholder="🔍 Cari SKU / nama…" oninput="filterTable(this,'gud')"></div>
+    <table id="gud"><thead><tr><th>SKU</th><th>Nama</th><th>Kategori</th><th class="num">Stok</th><th class="num">Min</th><th class="num">Harga</th><th>Status</th></tr></thead>
+      <tbody>${list.map(s=>{const kr=s.stok<s.min;return `<tr onclick="adjustStock('${s.sku}')"><td class="ttl">${s.sku}</td><td>${s.nm}</td><td>${s.kat}</td><td class="num" style="font-weight:700;color:${kr?'var(--red)':'var(--ink)'}">${s.stok}</td><td class="num">${s.min}</td><td class="num">${rp(s.harga)}</td><td>${kr?'<span class="pill" style="background:var(--red-soft);color:var(--red)">Kritis</span>':'<span class="pill" style="background:var(--green-soft);color:var(--green)">Aman</span>'}</td></tr>`}).join('')}</tbody></table>
+  </div>`;
+};
+function adjustStock(sku){
+  const s=DATA.spareparts.find(x=>x.sku===sku);
+  openModal(`<div class="modal-head"><h2>${s.nm}</h2><button class="x" onclick="closeModal()">×</button></div>
+  <div class="modal-body">
+    <div class="field"><label>SKU</label><div style="font-weight:600">${s.sku}</div></div>
+    <div class="field"><label>Stok saat ini</label><div style="font-size:28px;font-weight:700" id="stokVal">${s.stok}</div></div>
+    <div class="field"><label>Penyesuaian stok</label>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn btn-ghost" onclick="document.getElementById('stokVal').textContent=Math.max(0,+document.getElementById('stokVal').textContent-1)">− Keluar</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('stokVal').textContent=+document.getElementById('stokVal').textContent+1">+ Masuk</button>
+        <span style="color:var(--muted);font-size:12px;margin-left:auto">📷 Scan Barcode/QR</span>
+      </div></div>
+  </div>
+  <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Batal</button><button class="btn btn-primary" onclick="s_save('${sku}')">Simpan</button></div>`);
+}
+function s_save(sku){const s=DATA.spareparts.find(x=>x.sku===sku);s.stok=+document.getElementById('stokVal').textContent;closeModal();toast(`Stok ${sku} → ${s.stok}`);go('gudang');}
+function formPart(){
+  openModal(`<div class="modal-head"><h2>Tambah Sparepart</h2><button class="x" onclick="closeModal()">×</button></div>
+  <div class="modal-body">
+    <div class="field-row"><div class="field"><label>SKU</label><input id="p_sku" placeholder="BRK-XXX-01"></div><div class="field"><label>Kategori</label><input id="p_kat" placeholder="Rem"></div></div>
+    <div class="field"><label>Nama</label><input id="p_nm" placeholder="Kampas Rem Depan"></div>
+    <div class="field-row"><div class="field"><label>Stok awal</label><input id="p_stok" type="number" placeholder="10"></div><div class="field"><label>Min. stok</label><input id="p_min" type="number" placeholder="5"></div></div>
+    <div class="field"><label>Harga (Rp)</label><input id="p_harga" type="number" placeholder="150000"></div>
+  </div>
+  <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Batal</button><button class="btn btn-primary" onclick="p_save()">Simpan</button></div>`);
+}
+function p_save(){DATA.spareparts.unshift({sku:document.getElementById('p_sku').value||'NEW-001',nm:document.getElementById('p_nm').value||'Sparepart baru',kat:document.getElementById('p_kat').value||'Lain',stok:+document.getElementById('p_stok').value||0,min:+document.getElementById('p_min').value||0,harga:+document.getElementById('p_harga').value||0});closeModal();toast('Sparepart ditambah');go('gudang');}
+function importExcel(){
+  openModal(`<div class="modal-head"><h2>Import dari Excel / Google Sheets</h2><button class="x" onclick="closeModal()">×</button></div>
+  <div class="modal-body">
+    <div style="height:120px;background:var(--paper);border:2px dashed var(--line);border-radius:12px;display:grid;place-items:center;color:var(--muted);cursor:pointer" onclick="document.getElementById('xlsxPrev').style.display='block'">📄 Klik untuk pilih file .xlsx<br><span style="font-size:11px">Kolom: SKU · Nama · Kategori · Stok · Min · Harga</span></div>
+    <div id="xlsxPrev" style="display:none;margin-top:16px">
+      <div class="sub2" style="margin-bottom:8px">Pratinjau · logika upsert berdasarkan SKU (cocok = update, baru = insert)</div>
+      <table style="border:1px solid var(--line);border-radius:8px"><thead><tr><th>SKU</th><th>Nama</th><th class="num">Stok</th><th>Aksi</th></tr></thead>
+      <tbody><tr><td>BRK-AVZ-01</td><td>Kampas Rem Depan</td><td class="num">+20</td><td><span class="pill" style="background:var(--blue-soft);color:var(--brand)">Update</span></td></tr>
+      <tr><td>TYR-95-01</td><td>Ban 195/65 R15</td><td class="num">12</td><td><span class="pill" style="background:var(--green-soft);color:var(--green)">Insert</span></td></tr></tbody></table>
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Batal</button><button class="btn btn-primary" onclick="closeModal();toast('2 baris diimpor (1 update, 1 insert)')">Import</button></div>`);
+}
+
+/* ===== PURCHASING ===== */
+PAGES.purchasing=(el)=>{
+  el.innerHTML=`
+  <div class="page-head"><div><h1>Purchasing</h1><div class="sub">${DATA.purchaseOrders.length} PO aktif · ${DATA.suppliers.length} supplier</div></div>
+    <button class="btn btn-primary" onclick="formPR()">+ Purchase Request</button></div>
+  <div class="grid2">
+    <div class="panel"><div class="panel-head"><h2>Purchase Order</h2></div>
+      <table><thead><tr><th>No. PO</th><th>Supplier</th><th class="num">Item</th><th class="num">Total</th><th>Status</th></tr></thead>
+      <tbody>${DATA.purchaseOrders.map(p=>`<tr onclick="toast('${p.no}')"><td class="ttl" style="color:var(--brand)">${p.no}</td><td>${p.supplier}</td><td class="num">${p.items}</td><td class="num">${rp(p.total)}</td><td>${pill(p.status)}</td></tr>`).join('')}</tbody></table></div>
+    <div class="panel"><div class="panel-head"><h2>Supplier</h2></div>
+      <div class="panel-body flush">${DATA.suppliers.map(s=>`<div class="row"><div class="avatar" style="background:${av()}">${initials(s.nm)}</div><div><div class="nm">${s.nm}</div><div class="sub2">${s.kat} · ${s.kontak}</div></div><span class="pill" style="background:var(--amber-soft);color:var(--amber);margin-left:auto">★ ${s.rating}</span></div>`).join('')}</div></div>
+  </div>`;
+};
+function formPR(){
+  const kritis=DATA.spareparts.filter(s=>s.stok<s.min);
+  openModal(`<div class="modal-head"><h2>Purchase Request</h2><button class="x" onclick="closeModal()">×</button></div>
+  <div class="modal-body">
+    <div class="sub2" style="margin-bottom:10px">Item stok kritis disarankan otomatis:</div>
+    ${kritis.map(s=>`<div class="check done" onclick="this.classList.toggle('done');this.querySelector('.box').textContent=this.classList.contains('done')?'✓':''"><div class="box">✓</div><div class="txt">${s.nm} <span style="color:var(--muted)">· butuh ${s.min-s.stok+s.min} unit</span></div></div>`).join('')}
+    <div class="field" style="margin-top:14px"><label>Supplier tujuan</label><select>${DATA.suppliers.map(s=>`<option>${s.nm}</option>`).join('')}</select></div>
+  </div>
+  <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Batal</button><button class="btn btn-primary" onclick="closeModal();toast('PR dikirim ke Manajemen untuk approval')">Kirim PR</button></div>`);
+}
+
+/* ===== QC ===== */
+PAGES.qc=(el)=>{
+  const qcList=DATA.workOrders.filter(w=>['Quality Control','Selesai'].includes(w.status));
+  el.innerHTML=`
+  <div class="page-head"><div><h1>Quality Control</h1><div class="sub">${qcList.length} unit menunggu / lulus QC</div></div></div>
+  <div class="panel"><div class="panel-head"><h2>Antrian QC</h2></div>
+    <div class="panel-body flush">${qcList.map(w=>`<div class="row"><div><div class="nm" style="color:var(--brand)">${w.no}</div><div class="sub2">${w.plat} · ${w.desc} · ${w.mek}</div></div><div style="margin-left:auto;display:flex;gap:8px;align-items:center">${pill(w.status)}<button class="btn btn-primary" onclick="openQC('${w.no}')">Periksa</button></div></div>`).join('')}</div></div>`;
+};
+function openQC(no){
+  const w=DATA.workOrders.find(x=>x.no===no);
+  const items=['Hasil pekerjaan sesuai work order','Tidak ada kebocoran / kerusakan baru','Test drive berjalan normal','Kebersihan kendaraan terjaga','Dokumentasi foto lengkap'];
+  openModal(`<div class="modal-head"><h2>QC · ${w.no}</h2><button class="x" onclick="closeModal()">×</button></div>
+  <div class="modal-body">
+    <div class="field"><label>Kendaraan</label><div style="font-weight:600">${w.kendaraan} · ${w.plat}</div></div>
+    <div class="field"><label>Checklist QC</label>${items.map(c=>`<div class="check" onclick="this.classList.toggle('done');this.querySelector('.box').textContent=this.classList.contains('done')?'✓':''"><div class="box"></div><div class="txt">${c}</div></div>`).join('')}</div>
+    <div class="field"><label>Catatan supervisor</label><textarea rows="2" placeholder="Catatan hasil QC…"></textarea></div>
+  </div>
+  <div class="modal-foot"><button class="btn btn-ghost" onclick="qcResult('${no}','rework')">✗ Gagal (Rework)</button><button class="btn btn-primary" onclick="qcResult('${no}','pass')">✓ Lulus QC</button></div>`);
+}
+function qcResult(no,r){const w=DATA.workOrders.find(x=>x.no===no);if(r==='pass'){w.status='Selesai';toast(`${no} lulus QC → Selesai`);}else{w.status='Dikerjakan';toast(`${no} gagal QC → kembali Dikerjakan`);}closeModal();go('qc');}
+
+/* ===== KASIR ===== */
+PAGES.kasir=(el)=>{
+  const lunas=DATA.invoices.filter(i=>i.status==='Lunas').reduce((a,i)=>a+i.total,0);
+  const piutang=DATA.invoices.filter(i=>i.status==='Piutang').reduce((a,i)=>a+i.total,0);
+  el.innerHTML=`
+  <div class="page-head"><div><h1>Kasir & Pembayaran</h1><div class="sub">Terkumpul ${rpShort(lunas)} · piutang ${rpShort(piutang)}</div></div>
+    <button class="btn btn-primary" onclick="newInvoice()">+ Invoice dari WO</button></div>
+  <div class="kpis" style="grid-template-columns:repeat(3,1fr)">
+    <div class="kpi"><div class="ic" style="background:var(--green-soft);color:var(--green)">💵</div><div class="lbl">Pendapatan Lunas</div><div class="val">${rpShort(lunas)}</div></div>
+    <div class="kpi"><div class="ic" style="background:var(--amber-soft);color:var(--amber)">⏳</div><div class="lbl">Piutang</div><div class="val">${rpShort(piutang)}</div></div>
+    <div class="kpi"><div class="ic" style="background:var(--blue-soft);color:var(--brand)">🧾</div><div class="lbl">Total Invoice</div><div class="val">${DATA.invoices.length}</div></div>
+  </div>
+  <div class="panel"><div class="panel-head"><h2>Daftar Invoice</h2></div>
+    <table><thead><tr><th>No. Invoice</th><th>WO</th><th>Pelanggan</th><th>Metode</th><th class="num">Total</th><th>Status</th></tr></thead>
+    <tbody>${DATA.invoices.map(i=>`<tr onclick="openInvoice('${i.no}')"><td class="ttl" style="color:var(--brand)">${i.no}</td><td>${i.wo}</td><td>${i.cust}<div class="sub2">${i.plat}</div></td><td>${i.metode}</td><td class="num">${rp(i.total)}</td><td>${pill(i.status)}</td></tr>`).join('')}</tbody></table></div>`;
+};
+function openInvoice(no){
+  const i=DATA.invoices.find(x=>x.no===no);
+  const dpp=Math.round(i.total/1.11),ppn=i.total-dpp;
+  openModal(`<div class="modal-head"><h2>${i.no}</h2><button class="x" onclick="closeModal()">×</button></div>
+  <div class="modal-body">
+    <div class="field-row"><div class="field"><label>Pelanggan</label><div style="font-weight:600">${i.cust}</div></div><div class="field"><label>Kendaraan</label><div style="font-weight:600">${i.plat}</div></div></div>
+    <div style="border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px">
+      <div class="summary-line"><span>Subtotal (DPP)</span><span>${rp(dpp)}</span></div>
+      <div class="summary-line"><span>PPN 11%</span><span>${rp(ppn)}</span></div>
+      <div class="summary-line"><span>Total</span><span>${rp(i.total)}</span></div></div>
+    <div class="field"><label>Metode Pembayaran</label>
+      <div style="display:flex;gap:8px">${['Tunai','Transfer','QRIS'].map((m,x)=>`<div class="slot ${i.metode===m||(x===2&&i.metode==='QRIS')?'sel':''}" style="flex:1" onclick="document.querySelectorAll('.slot').forEach(s=>s.classList.remove('sel'));this.classList.add('sel')">${m}</div>`).join('')}</div></div>
+  </div>
+  <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal();toast('Struk dicetak')">🖨 Cetak Struk</button><button class="btn btn-primary" onclick="payInvoice('${no}')">${i.status==='Lunas'?'Sudah Lunas':'Terima Pembayaran'}</button></div>`);
+}
+function payInvoice(no){const i=DATA.invoices.find(x=>x.no===no);i.status='Lunas';closeModal();toast(`${no} → Lunas`);go('kasir');}
+function newInvoice(){
+  const eligible=DATA.workOrders.filter(w=>['Selesai','Diserahkan'].includes(w.status));
+  openModal(`<div class="modal-head"><h2>Invoice Baru</h2><button class="x" onclick="closeModal()">×</button></div>
+  <div class="modal-body"><div class="field"><label>Pilih Work Order (selesai)</label><select id="iv_wo">${eligible.map(w=>`<option value="${w.no}">${w.no} · ${w.plat} · ${rp(w.estimasi)}</option>`).join('')}</select></div>
+  <div class="field"><label>Diskon (Rp)</label><input id="iv_disc" type="number" placeholder="0"></div></div>
+  <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Batal</button><button class="btn btn-primary" onclick="saveInvoice()">Buat Invoice</button></div>`);
+}
+function saveInvoice(){
+  const wno=document.getElementById('iv_wo').value;const w=DATA.workOrders.find(x=>x.no===wno);
+  const disc=+document.getElementById('iv_disc').value||0;
+  const total=Math.round((w.estimasi-disc)*1.11);
+  const no='INV-2026-'+(1183+DATA.invoices.length-4);
+  DATA.invoices.unshift({no,wo:wno,plat:w.plat,cust:'Pelanggan',total,status:'Piutang',metode:'—'});
+  closeModal();toast(`${no} dibuat`);go('kasir');
+}
+
+/* ===== CRM ===== */
+PAGES.crm=(el)=>{
+  el.innerHTML=`
+  <div class="page-head"><div><h1>CRM</h1><div class="sub">${DATA.customers.length} pelanggan terdaftar</div></div>
+    <button class="btn btn-primary" onclick="toast('Reminder servis berkala terkirim ke 3 pelanggan')">🔔 Kirim Reminder</button></div>
+  <div class="grid2">
+    <div class="panel"><div class="panel-head"><h2>Pelanggan</h2><input class="input" placeholder="🔍 Cari…" oninput="filterTable(this,'cust')"></div>
+      <table id="cust"><thead><tr><th>Nama</th><th>Kontak</th><th>Kendaraan</th><th>Servis Terakhir</th></tr></thead>
+      <tbody>${DATA.customers.map(c=>`<tr onclick="toast('Riwayat ${c.nm}')"><td class="ttl">${c.nm}</td><td>${c.hp}</td><td>${c.kendaraan}</td><td class="sub2">${c.terakhir}</td></tr>`).join('')}</tbody></table></div>
+    <div class="panel"><div class="panel-head"><h2>Aktivitas</h2></div>
+      <div class="panel-body flush">
+        <div class="row"><div class="avatar" style="background:var(--green)">✓</div><div><div class="nm">Garansi pekerjaan aktif</div><div class="sub2">B 3456 IJ · servis berkala · s/d 12 Sep</div></div></div>
+        <div class="row"><div class="avatar" style="background:var(--amber)">!</div><div><div class="nm">Komplain ditindaklanjuti</div><div class="sub2">Ibu Wulan · AC kurang dingin · diproses</div></div></div>
+        <div class="row"><div class="avatar" style="background:var(--brand)">★</div><div><div class="nm">Program loyalitas</div><div class="sub2">PT Logistik Maju · 14 servis · tier Gold</div></div></div>
+        <div class="row"><div class="avatar" style="background:var(--purple)">🔔</div><div><div class="nm">Reminder terjadwal</div><div class="sub2">3 pelanggan jatuh tempo servis minggu ini</div></div></div>
+      </div></div>
+  </div>`;
+};
+
+/* ===== HR ===== */
+PAGES.hr=(el)=>{
+  const hadir=DATA.staff.filter(s=>s.hadir).length;
+  el.innerHTML=`
+  <div class="page-head"><div><h1>HR & Mekanik</h1><div class="sub">${hadir}/${DATA.staff.length} hadir hari ini</div></div></div>
+  <div class="panel"><div class="panel-head"><h2>Produktivitas & Absensi</h2></div>
+    <table><thead><tr><th>Mekanik</th><th>Posisi</th><th>Hadir</th><th>Progress Target</th><th class="num">WO Selesai</th></tr></thead>
+    <tbody>${DATA.staff.map(s=>{const pct=Math.round(s.woSelesai/s.target*100);const col=pct>=90?'var(--green)':pct>=70?'var(--amber)':'var(--red)';
+      return `<tr><td class="ttl">${s.nm}</td><td>${s.role}</td><td>${s.hadir?'<span class="pill" style="background:var(--green-soft);color:var(--green)">Hadir</span>':'<span class="pill" style="background:var(--red-soft);color:var(--red)">Absen</span>'}</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="stock-bar" style="max-width:140px"><i style="width:${pct}%;background:${col}"></i></div><span class="sub2">${pct}%</span></div></td>
+      <td class="num" style="font-weight:700">${s.woSelesai}/${s.target}</td></tr>`}).join('')}</tbody></table></div>`;
+};
+
+/* ===== LAPORAN ===== */
+PAGES.laporan=(el)=>{
+  const reports=[
+    {ic:'💰',nm:'Laporan Penjualan',d:'Rincian pendapatan per layanan & periode'},
+    {ic:'📈',nm:'Laba Rugi (P&L)',d:'Pendapatan dikurangi HPP & biaya operasional'},
+    {ic:'📦',nm:'Laporan Stok',d:'Mutasi & nilai persediaan sparepart'},
+    {ic:'🛒',nm:'Laporan Pembelian',d:'Realisasi PO & pengeluaran supplier'},
+    {ic:'👷',nm:'Produktivitas Mekanik',d:'WO selesai vs target per mekanik'},
+    {ic:'🚗',nm:'Kendaraan Masuk',d:'Volume unit masuk per hari/bulan'},
+    {ic:'🔧',nm:'Sparepart Terlaris',d:'Ranking part berdasarkan pemakaian'},
+    {ic:'💧',nm:'Arus Kas (Cash Flow)',d:'Kas masuk & keluar per periode'},
+  ];
+  el.innerHTML=`
+  <div class="page-head"><div><h1>Laporan</h1><div class="sub">Unduh atau pratinjau laporan operasional & keuangan</div></div>
+    <div class="range"><button>Bulan Ini</button><button class="active">Kuartal</button><button>Tahun</button></div></div>
+  <div class="kpis" style="grid-template-columns:repeat(4,1fr)">
+    ${reports.map(r=>`<div class="kpi" style="cursor:pointer" onclick="toast('Membuka ${r.nm}…')"><div class="ic" style="background:var(--brand-soft)">${r.ic}</div><div class="lbl" style="margin-top:10px">${r.nm}</div><div class="sub2" style="margin-top:4px">${r.d}</div></div>`).join('')}
+  </div>`;
+};
+
+/* ===== MANAJEMEN ===== */
+PAGES.manajemen=(el)=>{
+  const branches=[
+    {nm:'Jakarta Pusat',tipe:'Milik Sendiri',wo:24,rev:42,kpi:92},
+    {nm:'Bekasi',tipe:'Milik Sendiri',wo:16,rev:28,kpi:85},
+    {nm:'Bengkel Jaya',tipe:'Partner',wo:11,rev:18,kpi:78},
+  ];
+  el.innerHTML=`
+  <div class="page-head"><div><h1>Manajemen</h1><div class="sub">Monitoring seluruh jaringan · approval & KPI</div></div></div>
+  <div class="kpis" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi"><div class="ic" style="background:var(--blue-soft);color:var(--brand)">🏢</div><div class="lbl">Total Cabang</div><div class="val">3</div><div class="sub2">2 milik · 1 partner</div></div>
+    <div class="kpi"><div class="ic" style="background:var(--green-soft);color:var(--green)">💰</div><div class="lbl">Revenue Jaringan</div><div class="val">Rp 88jt</div><div class="delta up">▲ hari ini</div></div>
+    <div class="kpi"><div class="ic" style="background:var(--amber-soft);color:var(--amber)">⏳</div><div class="lbl">Menunggu Approval</div><div class="val">2</div><div class="sub2">PR & diskon</div></div>
+    <div class="kpi"><div class="ic" style="background:var(--purple-soft);color:var(--purple)">📊</div><div class="lbl">KPI Rata-rata</div><div class="val">85%</div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><div class="panel-head"><h2>Performa per Cabang</h2></div>
+      <table><thead><tr><th>Cabang</th><th>Tipe</th><th class="num">WO</th><th class="num">Revenue</th><th>KPI</th></tr></thead>
+      <tbody>${branches.map(b=>{const col=b.kpi>=90?'var(--green)':b.kpi>=80?'var(--amber)':'var(--red)';
+        return `<tr><td class="ttl">${b.nm}</td><td>${b.tipe==='Partner'?'<span class="pill" style="background:var(--purple-soft);color:var(--purple)">Partner</span>':'<span class="pill" style="background:var(--blue-soft);color:var(--brand)">Milik</span>'}</td><td class="num">${b.wo}</td><td class="num">Rp ${b.rev}jt</td><td><div style="display:flex;align-items:center;gap:8px"><div class="stock-bar" style="max-width:90px"><i style="width:${b.kpi}%;background:${col}"></i></div><span class="sub2">${b.kpi}%</span></div></td></tr>`}).join('')}</tbody></table></div>
+    <div class="panel"><div class="panel-head"><h2>Persetujuan</h2></div>
+      <div class="panel-body flush">
+        <div class="row"><div><div class="nm">PR-2026-0312 · Stok kritis</div><div class="sub2">CV Sumber Sparepart · Rp 2.450.000</div></div><div style="margin-left:auto;display:flex;gap:6px"><button class="btn btn-ghost" onclick="toast('Ditolak')">Tolak</button><button class="btn btn-primary" onclick="toast('PR disetujui')">Setujui</button></div></div>
+        <div class="row"><div><div class="nm">Diskon 15% · INV draft</div><div class="sub2">PT Logistik Maju · armada 14 unit</div></div><div style="margin-left:auto;display:flex;gap:6px"><button class="btn btn-ghost" onclick="toast('Ditolak')">Tolak</button><button class="btn btn-primary" onclick="toast('Diskon disetujui')">Setujui</button></div></div>
+      </div></div>
+  </div>`;
+};
+
+/* ===== util: filter tabel ===== */
+function filterTable(input,tableId){
+  const q=input.value.toLowerCase();
+  document.querySelectorAll(`#${tableId} tbody tr`).forEach(tr=>{
+    tr.style.display=tr.textContent.toLowerCase().includes(q)?'':'none';
+  });
+}
+
+/* ===== PELANGGAN (flow booking) ===== */
+const shops=[
+  {nm:'Bengkel Jaya Motor',ic:'🚗',bg:'var(--red-soft)',jarak:'2.1 km',det:'Servis umum & tune-up',rating:4.8,tags:['star','open']},
+  {nm:'Karoseri Sentosa',ic:'🔧',bg:'var(--blue-soft)',jarak:'5.4 km',det:'Box truk kustom & fabrikasi',rating:4.6,tags:['star','b2b']},
+  {nm:'Auto Body Pratama',ic:'🎨',bg:'var(--amber-soft)',jarak:'3.8 km',det:'Body repair & cat oven',rating:4.7,tags:['star','open']},
+];
+const booking={shop:null,service:null,day:null,slot:null};
+function renderPhone(){
+  const p=document.getElementById('phone');
+  p.innerHTML=`
+  <div class="ph-screen show" id="scr-home">
+    <div class="ph-head"><div class="hi">Halo, Milzon 👋</div><h2>Cari Bengkel</h2>
+      <div class="search">🔍 Servis, body repair, box truk…</div>
+      <div class="chips"><span class="chip on">Servis</span><span class="chip">Body Repair</span><span class="chip">Box Truk</span><span class="chip">Terdekat</span></div></div>
+    <div class="ph-body"><div class="sec-lbl">Bengkel terdekat</div>
+      ${shops.map((s,i)=>`<div class="shop" onclick="pickShop(${i})"><div class="thumb" style="background:${s.bg}">${s.ic}</div>
+        <div><div class="nm">${s.nm}</div><div class="det">${s.jarak} · ${s.det}</div>
+        <div class="tags"><span class="tag star">★ ${s.rating}</span>${s.tags.includes('open')?'<span class="tag open">Buka sekarang</span>':''}${s.tags.includes('b2b')?'<span class="tag b2b">B2B asuransi</span>':''}</div></div></div>`).join('')}</div>
+    <div class="tabbar"><div class="on"><span class="ti">🏠</span>Beranda</div><div onclick="toast('Booking')"><span class="ti">🗓</span>Booking</div><div onclick="toast('Riwayat')"><span class="ti">📋</span>Riwayat</div><div onclick="toast('Akun')"><span class="ti">👤</span>Akun</div></div>
+  </div>`;
+}
+function pickShop(i){booking.shop=shops[i];scrService();}
+function scrService(){
+  const p=document.getElementById('phone');
+  p.innerHTML=`<div class="ph-screen show">
+    <div class="ph-head"><button class="ph-back" onclick="renderPhone()">‹ Kembali</button><div class="hi">${booking.shop.nm}</div><h2>Pilih Layanan</h2></div>
+    <div class="ph-body">${DATA.services.map((s,i)=>`<div class="svc-opt" onclick="pickService(${i},this)"><div class="r"></div><div><div class="nm">${s.nm}</div><div class="sub2">⏱ ${s.durasi}</div></div><div class="price">${rp(s.harga)}</div></div>`).join('')}</div>
+    <button class="ph-cta" id="svcNext" disabled onclick="scrSchedule()">Lanjut Pilih Jadwal</button></div>`;
+}
+function pickService(i,elx){booking.service=DATA.services[i];document.querySelectorAll('.svc-opt').forEach(o=>o.classList.remove('sel'));elx.classList.add('sel');document.getElementById('svcNext').disabled=false;}
+function scrSchedule(){
+  const days=[{dd:'30',dm:'Sel'},{dd:'01',dm:'Rab'},{dd:'02',dm:'Kam'},{dd:'03',dm:'Jum'},{dd:'04',dm:'Sab'}];
+  const slots=['09:00','10:30','13:00','14:30','16:00','17:00'];
+  const p=document.getElementById('phone');
+  p.innerHTML=`<div class="ph-screen show">
+    <div class="ph-head"><button class="ph-back" onclick="scrService()">‹ Kembali</button><div class="hi">${booking.service.nm}</div><h2>Pilih Jadwal</h2></div>
+    <div class="ph-body"><div class="sec-lbl">Tanggal</div><div class="day-pick">${days.map((d,i)=>`<div class="day" onclick="pickDay(${i},this)"><div class="dd">${d.dd}</div><div class="dm">${d.dm}</div></div>`).join('')}</div>
+    <div class="sec-lbl" style="margin-top:16px">Jam tersedia</div><div class="slot-grid">${slots.map(s=>`<div class="slot" onclick="pickSlot('${s}',this)">${s}</div>`).join('')}</div></div>
+    <button class="ph-cta" id="schNext" disabled onclick="scrConfirm()">Lanjut Konfirmasi</button></div>`;
+  window._days=days;
+}
+function pickDay(i,elx){booking.day=window._days[i];document.querySelectorAll('.day').forEach(o=>o.classList.remove('sel'));elx.classList.add('sel');checkSchedule();}
+function pickSlot(s,elx){booking.slot=s;document.querySelectorAll('.slot').forEach(o=>o.classList.remove('sel'));elx.classList.add('sel');checkSchedule();}
+function checkSchedule(){document.getElementById('schNext').disabled=!(booking.day&&booking.slot);}
+function scrConfirm(){
+  const p=document.getElementById('phone');
+  p.innerHTML=`<div class="ph-screen show">
+    <div class="ph-head"><button class="ph-back" onclick="scrSchedule()">‹ Kembali</button><h2>Konfirmasi Booking</h2></div>
+    <div class="ph-body">
+      <div style="border:1px solid var(--line);border-radius:13px;padding:16px">
+        <div class="summary-line"><span style="color:var(--muted)">Bengkel</span><span>${booking.shop.nm}</span></div>
+        <div class="summary-line"><span style="color:var(--muted)">Layanan</span><span>${booking.service.nm}</span></div>
+        <div class="summary-line"><span style="color:var(--muted)">Jadwal</span><span>${booking.day.dd} ${booking.day.dm}, ${booking.slot}</span></div>
+        <div class="summary-line"><span>Estimasi</span><span>${rp(booking.service.harga)}</span></div>
+      </div>
+      <div class="sub2" style="margin-top:14px">Pembayaran dilakukan di bengkel setelah layanan selesai (tunai / transfer / QRIS).</div>
+    </div>
+    <button class="ph-cta" onclick="scrDone()">Konfirmasi Booking</button></div>`;
+}
+function scrDone(){
+  const p=document.getElementById('phone');
+  p.innerHTML=`<div class="ph-screen show">
+    <div class="success-anim"><div class="circle">✓</div><h2 style="font-size:20px">Booking Berhasil!</h2>
+    <div class="sub2" style="margin-top:8px;font-size:13px">Kode booking <b>BK-2026-0488</b><br>${booking.shop.nm} · ${booking.day.dd} ${booking.day.dm}, ${booking.slot}</div></div>
+    <div class="ph-body"><div class="sec-lbl">Selanjutnya</div>
+      <div class="row" style="border:1px solid var(--line);border-radius:11px;margin-bottom:8px"><div class="avatar" style="background:var(--brand)">1</div><div><div class="nm">Datang sesuai jadwal</div><div class="sub2">Tunjukkan kode booking ke service advisor</div></div></div>
+      <div class="row" style="border:1px solid var(--line);border-radius:11px"><div class="avatar" style="background:var(--accent)">2</div><div><div class="nm">Pantau status servis</div><div class="sub2">Notifikasi saat WO masuk QC & selesai</div></div></div>
+    </div>
+    <button class="ph-cta" onclick="renderPhone()">Kembali ke Beranda</button></div>`;
+  toast('Booking BK-2026-0488 dibuat');
+}
+
+/* ===== INIT ===== */
+renderNav();go('dashboard');renderPhone();
+
+</script>
+</body>
+</html>
