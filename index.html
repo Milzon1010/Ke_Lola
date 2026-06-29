@@ -186,10 +186,13 @@
   .success-anim{text-align:center;padding:40px 24px}
   .success-anim .circle{width:80px;height:80px;border-radius:50%;background:var(--green-soft);color:var(--green);font-size:42px;display:grid;place-items:center;margin:0 auto 18px;animation:pop .4s ease}
   @keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+  .mobile-menu-btn { display: none; background: none; border: 0; color: #fff; font-size: 22px; cursor: pointer; }
+  .side.show-mobile { display: block !important; position: fixed; top: 54px; left: 0; bottom: 0; z-index: 99; width: 230px; box-shadow: 4px 0 15px rgba(0,0,0,0.5); }
   @media(max-width:900px){
     .corp{grid-template-columns:1fr}.side{display:none}
     .kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}
     .board{grid-template-columns:repeat(2,1fr)}
+    .mobile-menu-btn { display: block; }
   }
 </style>
 </head>
